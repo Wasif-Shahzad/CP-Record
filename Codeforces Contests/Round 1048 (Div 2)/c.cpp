@@ -1,0 +1,68 @@
+//
+// e1
+// Created by Wasif on 09/08/25 at 21:42:15.
+//
+
+#include <bits/stdc++.h>
+using namespace std;
+#define int long long
+#pragma GCC optimize("O3,unroll-loops")
+#pragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt")
+
+signed main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int T;
+    cin >> T;
+    while(T--) {
+        int n, k;
+        cin >> n >> k;
+        vector<vector<int>> g(n);
+        for(int i = 1; i < n; i++) {
+            int p; cin >> p;
+            p--;
+            g[p].push_back(i);
+            g[i].push_back(p);
+        }
+        vector<int> depth(n), cnt(n + 1, 0);
+        int mn_depth = 1e9;
+        auto build = [&] (int v, int p, auto&& self) -> void{
+            bool leaf = true;
+            cnt[depth[v]]++;
+            for(int c: g[v]) {
+                if(c == p) continue;
+                depth[c] = depth[v] + 1;
+                leaf = false;
+                self(c, v, self);
+            }
+            if(leaf) {
+                mn_depth = min(mn_depth, depth[v]);
+            }
+        };
+        depth[0] = 0;
+        build(0, -1, build);
+        vector<int> nodes(n + 1, 0);
+        for(int i = 0; i < n; i++) {
+            nodes[i] = cnt[i];
+            if(i) nodes[i] += nodes[i - 1];
+        }
+        vector<vector<int>> dp(mn_depth + 1, vector<int>(k + 1, -1));
+        auto f = [&] (int d, int used, auto&& self) -> int{
+            if(d > mn_depth) return 0;
+            if(dp[d][used] != -1) return dp[d][used];
+            int full = (d > 0 ? nodes[d - 1] : 0);
+            int usedZer = full - used;
+            int zero = (n - k) - usedZer, ones = k - used;
+            int ans = 0;
+            if(zero >= cnt[d]) {
+                ans = 1 + self(d + 1, used, self);
+            } 
+            if(ones >= cnt[d]) {
+                ans = max(ans, 1 + self(d + 1, used + cnt[d], self));
+            }
+            return dp[d][used] = ans;
+        };
+        cout << f(0, 0, f) << '\n';
+    }
+}
