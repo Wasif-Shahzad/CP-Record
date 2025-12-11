@@ -9,34 +9,47 @@ using namespace std;
 #pragma GCC optimize("O3,unroll-loops")
 #pragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt")
 
+vector<int> dx = {0, -1, -1, -1, 0, 1, 1, 1};
+vector<int> dy = {1, 1, 0, -1, -1, -1, 0, 1};
+
+void solve() {
+    int n, m;
+    cin >> n >> m;
+    vector<string> g(n);
+    for(int i = 0; i < n; i++)
+        cin >> g[i];
+
+    vector<vector<int>> vis(n, vector<int>(m, 0));
+    auto dfs = [&] (int i, int j, auto&& self) -> void{
+        vis[i][j] = 1;
+        for(int k = 0; k < 8; k++) {
+            int ni = i + dx[k], nj = j + dy[k];
+            if(ni < 0 || nj < 0 || ni >= n || nj >= m) continue;
+            if(g[ni][nj] == '.') continue;
+            if(vis[ni][nj]) continue;
+            self(ni, nj, self);
+        }
+    };
+    int ans = 0;
+    for(int i = 0; i < n; i++) {
+        for(int j = 0; j < m; j++) {
+            if(g[i][j] == '.') continue;
+            if(vis[i][j]) continue;
+            ans++;
+            dfs(i, j, dfs);
+        }
+    }
+    cout << ans;
+}
+
 signed main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    int n, k, x;
-    cin >> n >> k >> x;
-    vector<int> a(n);
-    for(int i = 0; i < n; i++) {
-        cin >> a[i];
+    int t = 1;
+    // cin >> t;
+    while(t--) {
+        solve();
     }
-    sort(a.begin(), a.end());
-    int ans = 1;
-    vector<int> gaps;
-    for(int i = 1; i < n; i++) {
-        if(a[i] - a[i - 1] > x) {
-            int need = (a[i] - a[i - 1] - 1) / x;
-            ans++;
-            gaps.push_back(need);
-        }
-    }
-    sort(gaps.begin(), gaps.end());
-    for(int i: gaps) {
-        if(i <= k) {
-            k -= i;
-            ans--;
-        } else {
-            break;
-        }
-    }
-    cout << ans << '\n';
+    
 }   

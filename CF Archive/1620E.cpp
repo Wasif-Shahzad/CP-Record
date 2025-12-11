@@ -9,43 +9,37 @@ using namespace std;
 #pragma GCC optimize("O3,unroll-loops")
 #pragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt")
 
-struct DSU {
-    vector<int> par, label, sz;
-
-    DSU(int n) {
-        sz.resize(n + 1, 1);
-        par.resize(n + 1);
-        iota(par.begin(), par.end(), 0);
-        label.resize(n + 1, -1);
-    }
-
-    int find(int v) {
-        if (v == par[v]) return v;
-        return par[v] = find(v);
-    }
-
-    void unite(int a, int b, int req) {
-        a = find(a);
-        b = find(b);
-        if (a != b) {
-            if (sz[a] < sz[b]) swap(a, b);
-            sz[a] += sz[b];
-            par[b] = a;
-            
-        }
-    }
-
-    void add(int i, int v) {
-        par[i] = v;
-        sz[v]++;
-    }
-};
-
 signed main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
     int q;
     cin >> q;
-    DSU dsu(q + 1);
-    
+    vector<vector<int>> pos(5e5 + 1);
+    int i = 0;
+    while(q--) {
+        int t;
+        cin >> t;
+        if(t == 1) {
+            int x;
+            cin >> x;
+            pos[x].push_back(i++);
+        } else {
+            int x, y;
+            cin >> x >> y;
+            if(x != y) {
+                if(pos[x].size() > pos[y].size()) pos[x].swap(pos[y]);
+                for(auto& j: pos[x]) pos[y].push_back(j); 
+                pos[x].clear();
+            }
+        }
+    }
+    vector<int> ans(i);
+    for(i = 1; i <= 5e5; i++) {
+        for(int j: pos[i]) {
+            ans[j] = i;
+        }
+    }
+
+    for(int &x: ans) cout << x << " ";
+    cout << '\n';
 }

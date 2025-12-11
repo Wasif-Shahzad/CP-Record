@@ -3,7 +3,7 @@
 set -e  # Immediately ragequit on failure because I have standards :triumph:
 
 CXX_FLAGS="-std=c++17 -O3 -march=native -DNDEBUG"
-MAX_TESTS=1000
+MAX_TESTS=5000
 
 echo ":wrench: Compiling your spaghetti :spaghetti:"
 

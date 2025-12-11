@@ -1,0 +1,81 @@
+//
+// minimal_rotations.cpp
+// Created by Wasif on 11/26/25 at 20:09:45.
+//
+
+#include <bits/stdc++.h>
+using namespace std;
+#define int long long
+#pragma GCC optimize("O3,unroll-loops")
+#pragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt")
+
+vector<int> p1, p2;
+const int mod1 = 1e9+7, mod2 = 1e9+9;
+random_device rd;
+uniform_int_distribution<int> gen(50, 1e6);
+int base = gen(rd);
+
+struct Hash{
+    vector<int> pref1, pref2;
+
+    void build(string& s) {
+        int n = s.size();
+        pref1.resize(n + 1, 0);
+        pref2.resize(n + 1, 0);
+
+        for(int i = 1; i <= n; i++) {
+            pref1[i] = ((pref1[i - 1] * base) % mod1 + (s[i - 1] - 'a' + 1)) % mod1;
+            pref2[i] = ((pref2[i - 1] * base) % mod2 + (s[i - 1] - 'a' + 1)) % mod2;
+        }
+    }
+
+    pair<int, int> get(int l, int r) {
+        int len = r - l + 1;
+        int first = ((pref1[r + 1] - (pref1[l] * p1[len]) % mod1) + mod1) % mod1;
+        int second = ((pref2[r + 1] - (pref2[l] * p2[len]) % mod2) + mod2) % mod2;
+        return {first, second};
+    }
+};
+
+signed main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    string s;
+    cin >> s;
+    int n = s.size();
+    s += s;
+
+    p1 = p2 = {1};
+    for(int i = 1; i <= n; i++) {
+        p1.push_back((p1.back() * base) % mod1);
+        p2.push_back((p2.back() * base) % mod2);
+    }
+
+    Hash hash;
+    hash.build(s);
+
+    int l = 0, r = n - 1;
+    for(int i = 1; i < n; i++) {
+        int j = i + n - 1;
+        // find lps of [l, r] and [i, j]
+        int lo = 0, hi = n + 1;
+        while(hi > lo + 1) {
+            int mid = (hi + lo) / 2;
+            auto first = hash.get(l, l + mid - 1);
+            auto second = hash.get(i, i + mid - 1);
+            if(first == second) lo = mid;
+            else hi = mid; 
+        }
+
+        if(lo == n) continue;
+        // hi is the first mismatch char
+        if(s[l + hi - 1] > s[i + hi - 1]) {
+            l = i;
+            r = j;
+        }
+    }
+
+    for(int i = l; i <= r; i++) cout << s[i];
+    cout << '\n';
+}
