@@ -1,6 +1,6 @@
 //
-// Gen.cpp
-// Created by Wasif on 12/12/25 at 11:52:30.
+// gen.cpp
+// Created by wasifshahzad on 12/23/25 at 20:56:09.
 //
 
 #include <bits/stdc++.h>
@@ -9,33 +9,45 @@ using namespace std;
 #pragma GCC optimize("O3,unroll-loops")
 #pragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt")
 
+const int MOD1 = 1e9+7;
+const int MOD2 = 998244353;
+
 int generateRandomInt(int l, int r) {
-    // 1. Obtain a seed for the random number engine.
-    // Using high_resolution_clock provides a good variable seed.
-    unsigned seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-
-    // 2. Standard mersenne_twister_engine seeded with the current time
-    // This is the random number engine.
-    std::mt19937 eng(seed);
-
-    // 3. Define the distribution for the specific range [l, r]
-    // The uniform_int_distribution includes BOTH l and r in the possible output.
+    // UPDATED: Made engine static to prevent re-seeding every call
+    // which causes identical values in tight loops.
+    static unsigned seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+    static std::mt19937 eng(seed);
+    
     std::uniform_int_distribution<int> distrib(l, r);
-
-    // 4. Generate the random number
     return distrib(eng);
 }
 
 signed main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
+    // cout << 1 << '\n';
+    // Macro from your snippet
+    #define get(l, r) generateRandomInt(l, r)
 
-    cout << 1 << '\n';
-    int n = generateRandomInt(1, 8);
-    int k = generateRandomInt(0, 32);
-    cout << n << " " << k << '\n';
+    int n = get(4, 7), q = get(1, 5);
+    cout << n << " " << q << '\n';
     for(int i = 0; i < n; i++) {
-        cout << generateRandomInt(0, 16) << " ";
+        int x = get(-5, 5);
+        while(x == 0) {
+            x = get(-5, 5);
+        }
+        int y = get(-5, 5);
+        if(x == 0) {
+            while(y == 0) {
+                y = get(-5, 5);
+            }
+        }
+        cout << x << " " << y << '\n';
     }
-    cout << '\n';
+    while(q--) {
+        int l = get(1, n), r = get(l, n);
+        cout << l << " " << r << '\n';   
+    }
+
+    return 0;
 }
