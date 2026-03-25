@@ -29,25 +29,17 @@ signed main() {
     // Macro from your snippet
     #define get(l, r) generateRandomInt(l, r)
 
-    int n = get(4, 7), q = get(1, 5);
-    cout << n << " " << q << '\n';
+    int n = get(2, 5);
+    vector<int> d(n);
+    int sum = 0;
+    for(int i = 0; i< n; i++) {
+        d[i] = get(1, 5);
+        sum += d[i];
+    }
+    int x = get(1, sum);
+    cout << n << " " << x << '\n';
     for(int i = 0; i < n; i++) {
-        int x = get(-5, 5);
-        while(x == 0) {
-            x = get(-5, 5);
-        }
-        int y = get(-5, 5);
-        if(x == 0) {
-            while(y == 0) {
-                y = get(-5, 5);
-            }
-        }
-        cout << x << " " << y << '\n';
+        cout << d[i] << " ";
     }
-    while(q--) {
-        int l = get(1, n), r = get(l, n);
-        cout << l << " " << r << '\n';   
-    }
-
-    return 0;
+    cout << '\n';
 }

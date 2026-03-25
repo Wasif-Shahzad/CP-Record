@@ -1,90 +1,122 @@
+//
+// 1358D.cpp
+// Created by wasifshahzad on 03/25/26 at 16:11:15.
+//
+
 #include <bits/stdc++.h>
 using namespace std;
-#define int long long int
-#define all(a) a.begin(), a.end()
-#define rall(a) a.rbegin(), a.rend()
-#define sz(a) (int)a.size()
-#define V vector
-#define ff first
-#define ss second
-#define rep(i, a, n) for (int i = a; i < n; i++)
-#define rev(i, a, n) for(int i = a; i > n; i--)
-#define out(a) cout << a << "\n"
-#define outv(a) rep(i, 0, (int)a.size()) cout << a[i] << " "; cout << endl;
-#define in(a) for(auto &i: a) cin >> i;
-#define pb push_back
-#define pii pair<int, int>
-const int mod1 = 1e9+7, mod2 = 998244353;
+#define int long long
+#define all(x) x.begin(), x.end()
 
-struct Point {
-    int x, y, id;
-    int region() {
-        if(x == 0 && y > 0) return 1;
-        if(x > 0 && y > 0) return 2;
-        if(x > 0 && y == 0) return 3;
-        if(x > 0 && y < 0) return 4;
-        if(x == 0 && y < 0) return 5;
-        if(x < 0 && y < 0) return 6;
-        if(x < 0 && y == 0) return 7;
-        return 8;
+const int MOD1 = 1e9+7;
+const int MOD2 = 998244353;
+
+/*
+are we supposed to optimize the sliding window brute force somehow?
+we can easily solve if we start in the beginning of each month
+same if we end in each month
+not sure if that's it?
+{1, 2, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 5}
+*/
+
+void solve() {
+    int n, x;
+    cin >> n >> x;
+    vector<int> d(n);
+    for(int i = 0; i < n; i++) {
+        cin >> d[i];
     }
-};
-
-int crossprod(Point a, Point b) {
-    return a.x * b.y - a.y * b.x;
-}
-
-bool cmp(Point& a, Point& b) {
-    if(a.region() != b.region()) {
-        return a.region() < b.region();
+    for(int i = 0; i < n; i++) {
+        d.push_back(d[i]);
     }
-    return crossprod(a, b) < 0;
-}
-
-void solve(){
-    int n, q;
-    cin >> n >> q;
-    V<Point> a(n);
-    rep(i, 0, n) {
-        cin >> a[i].x >> a[i].y;
-        a[i].id = i;
+    n *= 2;
+    vector<int> p1(n), p2(n), s1(n + 1, 0), s2(n);
+    p1[0] = d[0], p2[0] = d[0] * (d[0] + 1) / 2;
+    for(int i = 1; i < n; i++) {
+        p1[i] = p1[i - 1], p2[i] = p2[i - 1];
+        p1[i] += d[i];
+        p2[i] += d[i] * (d[i] + 1) / 2;
     }
-    sort(all(a), cmp);
-    V<int> pt(n);
-    V<int> pref = {1};
-    int j = 0;
-    pt[a[0].id] = 0;
-    rep(i, 1, n) {
-        if(a[i].region() == a[i - 1].region() && crossprod(a[i - 1], a[i]) == 0) {
-            pref.back()++;
-            pt[a[i].id] = j;
+    s1[n - 1] = d[n - 1], s2[n - 1] = d[n - 1] * (d[n - 1] + 1) / 2;
+    for(int i = n - 2; i >= 0; i--) {
+        s1[i] = s1[i + 1], s2[i] = s2[i + 1];
+        s1[i] += d[i];
+        s2[i] += d[i] * (d[i] + 1) / 2;
+    }
+    auto gp1 = [&] (int l, int r) -> int {
+        int ans = p1[r];
+        if(l > 0) ans -= p1[l - 1];
+        return ans;
+    };
+    auto gp2 = [&] (int l, int r) -> int {
+        int ans = p2[r];
+        if(l > 0) ans -= p2[l - 1];
+        return ans;
+    };
+    auto gs1 = [&] (int l, int r) -> int {
+        int ans = s1[l];
+        if(r + 1 < n) ans -= s1[r + 1];
+        return ans;
+    };
+    auto gs2 = [&] (int l, int r) -> int {
+        int ans = s2[l];
+        if(r + 1 < n) ans -= s2[r + 1];
+        return ans;
+    };
+    int ans = 0;
+    for(int i = 0; i < n / 2; i++) {
+        // start at i
+        int j = upper_bound(all(p1), p1[i] + x - d[i]) - p1.begin() - 1;
+        if(i > j) {
+            ans = max(ans, x * (x + 1) / 2);
+            continue;
+        }
+        if(gp1(i, j) == x) {
+            ans = max(ans, gp2(i, j));
         } else {
-            pref.pb(pref.back() + 1);
-            pt[a[i].id] = ++j;
+            int cur = gp2(i, j);
+            int rem = x - gp1(i, j);
+            cur += rem * (rem + 1) / 2;
+            ans = max(ans, cur);
         }
     }
-    while(q--) {
-        int l, r;
-        cin >> l >> r;
-        l--, r--;
-        if(pt[r] >= pt[l]) {
-            int sub = (pt[l] > 0 ? pref[pt[l] - 1] : 0);
-            cout << pref[pt[r]] - sub << '\n';
+    auto get_higher = [&] (int x) -> int {
+        int lo = 0, hi = n + 1;
+        while(hi > lo + 1) {
+            int mid = (hi + lo) / 2;
+            if(s1[mid] > x) lo = mid;
+            else hi = mid;
+        }
+        return lo;
+    };
+    auto get_sum = [&] (int i, int r) -> int {
+        int l = d[i] - r;
+        return d[i] * (d[i] + 1) / 2 - l * (l + 1) / 2;
+    };
+    for(int i = n - 1; i >= n / 2; i--) {
+        int j = get_higher(s1[i] + x - d[i]);
+        if(i == j) {
+            ans = max(ans, get_sum(i, x));
+            continue;
+        }
+        if(gs1(j + 1, i) == x) {
+            ans = max(ans, gs2(j + 1, i));
         } else {
-            int sub = (pt[l] > 0 ? pref[pt[l] - 1] : 0);
-            int ans = pref.back() - sub;
-            ans += pref[pt[r]];
-            cout << ans << '\n';
+            int cur = gs2(j + 1, i);
+            int rem = x - gs1(j + 1, i);
+            cur += get_sum(j, rem);
+            ans = max(ans, cur);
         }
     }
+    cout << ans << '\n';
 }
 
-signed main(){
-    ios_base::sync_with_stdio(NULL);
-    cin.tie(NULL);
+signed main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
     int t = 1;
     // cin >> t;
-    while(t--){
+    while(t--) {
         solve();
     }
 }
