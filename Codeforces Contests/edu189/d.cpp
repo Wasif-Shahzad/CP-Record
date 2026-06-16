@@ -1,6 +1,6 @@
 //
-// e.cpp
-// Created by wasifshahzad on 05/30/26 at 17:56:25.
+// d.cpp
+// Created by wasifshahzad on 04/21/26 at 20:03:42.
 //
 
 #include <bits/stdc++.h>
@@ -20,14 +20,14 @@ struct modint {
             if (k&1) r = (r*n)%M;
         return r;
     }
- 
+    
     int v; modint(int n = 0) : v(n%M) { v += (M&(0-(v<0))); }
     
     friend string to_string(const modint n) { return to_string(n.v); }
     friend istream& operator>>(istream& i, modint& n) { return i >> n.v; }
     friend ostream& operator<<(ostream& o, const modint n) { return o << n.v; }
     template<typename T> explicit operator T() { return T(v); }
- 
+    
     friend bool operator==(const modint n, const modint m) { return n.v == m.v; }
     friend bool operator!=(const modint n, const modint m) { return n.v != m.v; }
     friend bool operator<(const modint n, const modint m) { return n.v < m.v; }
@@ -49,7 +49,7 @@ struct modint {
     modint operator--(signed) { modint t = *this; return *this -= 1, t; }
     modint operator+() { return *this; }
     modint operator-() { return modint(0) -= *this; }
- 
+    
     // O(logk) modular exponentiation
     modint pow(const int k) const {
         return k < 0 ? _pow(v, M-1-(-k%(M-1))) : _pow(v, k);
@@ -58,44 +58,35 @@ struct modint {
 }; 
 using mint = modint<MOD2>; // check mod
 
-int power(int a, int b) {
-    int ans = 1;
-    while(b > 0) {
-        if(b & 1) ans = ans * a;
-        a = a * a;
-        b /= 2;
-    }
+/*
+1 3 0 4 1 7 0 8 1 11 0 12 
+1 + 4d
+3 + 4d
+
+1 + 4d <= x
+d <= (x - 1) / 4
+x <= 1 + 4d <= n
+(x - 1) / 4 <= d
+d <= (n - 1) / 4
+*/
+
+mint comp(int a, int d, int x, int n) {
+    int L = (x > a ? (x - a - 1) / d + 1 : 0);
+    int r = (n >= a ? (n - a) / d + 1 : 0);
+    int rng = max(0ll, r - L);
+    if(a == 3) L++;
+    if(L == 0 || rng == 0) return 0;
+    mint ans = mint(L) * rng;
     return ans;
 }
 
 void solve() {
-    int n, m;
-    cin >> n >> m;
-    // a (10^{len b} - 1) = 0 mod m
-    // a mod m = 0
-    // 10^{lenb} - 1 = 0 modm
-    // both
-    mint x = mint(n / m);
-    mint y = 0;
-    int len = to_string(n).size();
-    int p = 1;
-    for(int i = 1; i <= len; i++) {
-        p *= 10;
-        if((p - 1) % m == 0) {
-            if(i < len) {
-                int rng = 9 * power(10, i - 1);
-                y += rng;
-            } else {
-                if(len == 1) y += n;
-                else {
-                    y += n - power(10, i - 1) + 1;
-                }
-            }
-        }
-    }
-    mint ans = mint(x) * n;
-    ans += mint(y) * n;
-    ans -= x * y;
+    // ith bit repeats 2^i times. first 0 then 1 and so on
+    // only 1 and 0 repeat and they do every 4 numbers
+    // 1 3 0 4 1 7 0 8 1 11 
+    int n, x;
+    cin >> n >> x;
+    mint ans = comp(1, 4, x, n) + comp(3, 4, x, n);
     cout << ans << '\n';
 }
 

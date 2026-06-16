@@ -1,11 +1,11 @@
 //
-// 1430E.cpp
-// Created by wasifshahzad on 05/25/26 at 20:03:16.
+// f.cpp
+// Created by wasifshahzad on 04/30/26 at 20:20:35.
 //
 
 #include <bits/stdc++.h>
 using namespace std;
-// #define int long long
+#define int long long
 #define all(x) x.begin(), x.end()
 
 const int MOD1 = 1e9+7;
@@ -33,13 +33,13 @@ struct Tag {
 };
 
 struct Node {
-    int v, idx, len;
+    int v, len;
     // For MAX: use -1 or -INF. For SUM/GCD/XOR: use 0. For MIN: use INF.
-    Node(int x = 1e6, int i = -1, int ll = 0) : v(x), idx(i), len(ll) {} 
+    Node(int x = 0, int ll = 0) : v(x), len(ll) {} 
     Node operator+(const Node &other) {
-        return Node(min(v, other.v), (v <= other.v ? idx : other.idx), len + other.len);
+        return Node(v + other.v, len + other.len);
     }
-    void apply(const Tag& t) { v += t.v; }
+    void apply(const Tag& t) { v += len * t.v; }
 };
 
 struct LazySeg {
@@ -97,34 +97,49 @@ struct LazySeg {
     Node query(int l, int r) { return qry(1, 0, n, l, r); }
 };
 
-int power(int a, int b) {
-    int ans = 1;
-    while(b > 0) {
-        if(b & 1) ans = ans * a;
-        a = a * a;
-        b /= 2;
-    }
-    return ans;
-}
-
 void solve() {
-    int n, m;
-    cin >> n >> m;
+    // for a block at height h, its the last occurence of a tower with a[j] >= h (a[n + 1] = n + 1)
+    // sum of all last occurences - i - 1
+    // segment tree
+    // decreasing ai only affects height ai
+    // till ak such that ak >= ai
+    // all of them will get what we got for ai i.e. last[a[i]] - i - 1
+    // 1 2 3 2 1
+    // 1 2 3 1 2
+    // 1 2 1 2 3
+    // 1 1 2 2 3
+    int n;
+    cin >> n;
+    vector<int> a(n);
+    for(int i = 0; i < n; i++) {
+        cin >> a[i];
+    }
+    vector<Node> cur(n + 1, Node(n, 1));
+    LazySeg seggy(cur);
+    vector<int> rng(n);
     int ans = 0;
-    set<int> x, y;
-    for(int a = 1; a <= n; a++) {
-        for(int b = 1; b <= n; b++) {
-            if(a % m == 0) {
-                ans++;
-                x.insert(a);
-                int len = to_string(b).size();
-                if((power(10, len) - 1) % m == 0) y.insert(a);
-            }
-            else {
-                int len = to_string(b).size();
-                if((power(10, len) - 1) % m == 0) ans++, y.insert(b);
-            } 
+    for(int i = n - 1; i >= 0; i--) {
+        ans += seggy.query(1, a[i] + 1).v - a[i] * (i + 1);
+        rng[i] = seggy.query(a[i], a[i] + 1).v;
+        seggy.update(1, a[i] + 1, Tag(-1));
+    }
+    stack<pair<int, int>> s;
+    vector<int> lst(n, -1);
+    for(int i = 0; i < n; i++) {
+        while(s.size() && s.top().first < a[i]) s.pop();
+        if(s.size()) {
+            lst[i] = s.top().second;
         }
+        s.push({a[i], i});
+    }
+    vector<Node> tmp(n + 1, Node(0, 1));
+    LazySeg freq(tmp);
+    freq.update(1, a[0] + 1, 1);
+    int oans = ans;
+    for(int i = 1; i < n; i++) {
+        int here = oans + freq.query(a[i], a[i] + 1).v;
+        ans = max(ans, here);
+        freq.update(1, a[i] + 1, 1);
     }
     cout << ans << '\n';
 }

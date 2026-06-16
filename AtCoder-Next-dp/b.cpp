@@ -1,6 +1,6 @@
 //
-// e.cpp
-// Created by wasifshahzad on 05/30/26 at 17:56:25.
+// b.cpp
+// Created by wasifshahzad on 05/05/26 at 11:59:43.
 //
 
 #include <bits/stdc++.h>
@@ -58,46 +58,33 @@ struct modint {
 }; 
 using mint = modint<MOD2>; // check mod
 
-int power(int a, int b) {
-    int ans = 1;
-    while(b > 0) {
-        if(b & 1) ans = ans * a;
-        a = a * a;
-        b /= 2;
-    }
-    return ans;
-}
-
 void solve() {
     int n, m;
     cin >> n >> m;
-    // a (10^{len b} - 1) = 0 mod m
-    // a mod m = 0
-    // 10^{lenb} - 1 = 0 modm
-    // both
-    mint x = mint(n / m);
-    mint y = 0;
-    int len = to_string(n).size();
-    int p = 1;
-    for(int i = 1; i <= len; i++) {
-        p *= 10;
-        if((p - 1) % m == 0) {
-            if(i < len) {
-                int rng = 9 * power(10, i - 1);
-                y += rng;
-            } else {
-                if(len == 1) y += n;
-                else {
-                    y += n - power(10, i - 1) + 1;
-                }
-            }
-        }
+    vector<vector<int>> g(n);
+    for(int i = 0; i < m; i++) {
+        int u, v;
+        cin >> u >> v;
+        u--, v--;
+        g[u].push_back(v);
     }
-    mint ans = mint(x) * n;
-    ans += mint(y) * n;
-    ans -= x * y;
-    cout << ans << '\n';
-}
+    vector<mint> dp(n, 0);
+    vector<int> vis(n, 0);
+    dp[n - 1] = 1;
+    auto dfs = [&] (int v, auto&& self) -> mint {
+        if(v == n - 1) return 1;
+        if(vis[v]) {
+            return dp[v];
+        }
+        vis[v] = 1;
+        for(int c: g[v]) {
+            self(c, self);
+            dp[v] += dp[c];
+        }
+        return dp[v];
+    };
+    cout << dfs(0, dfs) << '\n';
+}   
 
 signed main() {
     ios::sync_with_stdio(false);

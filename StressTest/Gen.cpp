@@ -25,21 +25,8 @@ int generateRandomInt(int l, int r) {
 signed main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
-    // cout << 1 << '\n';
+    cout << 1 << '\n';
     // Macro from your snippet
     #define get(l, r) generateRandomInt(l, r)
-
-    int n = get(2, 5);
-    vector<int> d(n);
-    int sum = 0;
-    for(int i = 0; i< n; i++) {
-        d[i] = get(1, 5);
-        sum += d[i];
-    }
-    int x = get(1, sum);
-    cout << n << " " << x << '\n';
-    for(int i = 0; i < n; i++) {
-        cout << d[i] << " ";
-    }
-    cout << '\n';
+    cout << get(1, 300) << " " << get(1, 300) << '\n';
 }

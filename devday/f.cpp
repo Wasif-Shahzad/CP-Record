@@ -1,11 +1,11 @@
 //
-// 1430E.cpp
-// Created by wasifshahzad on 05/25/26 at 20:03:16.
+// f.cpp
+// Created by wasifshahzad on 04/30/26 at 14:00:19.
 //
 
 #include <bits/stdc++.h>
 using namespace std;
-// #define int long long
+#define int long long
 #define all(x) x.begin(), x.end()
 
 const int MOD1 = 1e9+7;
@@ -29,17 +29,17 @@ struct Tag {
     // INITIALIZE with a value which isn't used 
     // it is -1 for range AND
     Tag(int x = 0) : v(x) {}
-    void apply(const Tag& other) { v += other.v; }
+    void apply(const Tag& other) { if(other.v != 0) v = other.v; }
 };
 
 struct Node {
-    int v, idx, len;
+    int v;
     // For MAX: use -1 or -INF. For SUM/GCD/XOR: use 0. For MIN: use INF.
-    Node(int x = 1e6, int i = -1, int ll = 0) : v(x), idx(i), len(ll) {} 
+    Node(int x = 0) : v(x) {} 
     Node operator+(const Node &other) {
-        return Node(min(v, other.v), (v <= other.v ? idx : other.idx), len + other.len);
+        return Node(max(v, other.v));
     }
-    void apply(const Tag& t) { v += t.v; }
+    void apply(const Tag& t) { if(t.v != 0) v = t.v; }
 };
 
 struct LazySeg {
@@ -97,36 +97,11 @@ struct LazySeg {
     Node query(int l, int r) { return qry(1, 0, n, l, r); }
 };
 
-int power(int a, int b) {
-    int ans = 1;
-    while(b > 0) {
-        if(b & 1) ans = ans * a;
-        a = a * a;
-        b /= 2;
-    }
-    return ans;
-}
-
 void solve() {
-    int n, m;
-    cin >> n >> m;
-    int ans = 0;
-    set<int> x, y;
-    for(int a = 1; a <= n; a++) {
-        for(int b = 1; b <= n; b++) {
-            if(a % m == 0) {
-                ans++;
-                x.insert(a);
-                int len = to_string(b).size();
-                if((power(10, len) - 1) % m == 0) y.insert(a);
-            }
-            else {
-                int len = to_string(b).size();
-                if((power(10, len) - 1) % m == 0) ans++, y.insert(b);
-            } 
-        }
-    }
-    cout << ans << '\n';
+    string s;
+    cin>>s;
+    stack<pair<char, int>> asdf;
+    asdf.push
 }
 
 signed main() {

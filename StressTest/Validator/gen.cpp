@@ -28,10 +28,8 @@ signed main() {
     // cout << 1 << '\n';
     // Macro from your snippet
     #define get(l, r) generateRandomInt(l, r)
-
-    int n = get(1, 10);
-    cout << n << '\n';
-    for(int i = 0; i < n; i++) {
-        cout << get(1, 10) << " " << get(1, 100) << " " << get(1, 10) << "\n";
-    }
+    cout << 1 << '\n';
+    int n = get(1, 7), m = get(1, 7);
+    int a = get(1, m), b = get(1, n);
+    cout << n << ' ' << m << " "<< a << " "<< b << '\n';
 }
