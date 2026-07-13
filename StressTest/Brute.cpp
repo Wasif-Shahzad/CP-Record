@@ -1,130 +1,83 @@
 //
-// 1430E.cpp
-// Created by wasifshahzad on 05/25/26 at 20:03:16.
+// 449B.cpp
+// Created by wasifshahzad on 06/23/26 at 18:50:17.
 //
 
 #include <bits/stdc++.h>
 using namespace std;
-// #define int long long
+#define int long long
 #define all(x) x.begin(), x.end()
 
 const int MOD1 = 1e9+7;
 const int MOD2 = 998244353;
 
-/**
- * @brief Generic Lazy Segment Tree (0-indexed, half-open intervals [l, r))
- * * @complexity O(N) Build, O(log N) Update/Query
- * * @customization
- * 1. struct Tag: Define update parameters (e.g., add value, set value).
- * - implement `apply(Tag)` to compose new updates onto existing lazy tags.
- * 2. struct Node: Define segment data (e.g., sum, max, len).
- * - implement `operator+` to merge two nodes (child -> parent).
- * - implement `apply(Tag)` to update a node's value based on a tag.
- * 3. Identity Elements: 
- * - Node constructor defaults should represent the identity (Sum=0, Min=INF).
- * - Tag constructor defaults should represent "no update".
- */
-struct Tag {
-    int v;
-    // INITIALIZE with a value which isn't used 
-    // it is -1 for range AND
-    Tag(int x = 0) : v(x) {}
-    void apply(const Tag& other) { v += other.v; }
-};
-
-struct Node {
-    int v, idx, len;
-    // For MAX: use -1 or -INF. For SUM/GCD/XOR: use 0. For MIN: use INF.
-    Node(int x = 1e6, int i = -1, int ll = 0) : v(x), idx(i), len(ll) {} 
-    Node operator+(const Node &other) {
-        return Node(min(v, other.v), (v <= other.v ? idx : other.idx), len + other.len);
-    }
-    void apply(const Tag& t) { v += t.v; }
-};
-
-struct LazySeg {
-    int n;
-    vector<Node> t;
-    vector<Tag> lazy;
-
-    LazySeg(int n): n(n), t(4*n), lazy(4*n) {}
-    LazySeg(vector<Node> &a): LazySeg(a.size()) { build(a); }
-
-    void apply(int x, const Tag& val) { t[x].apply(val); lazy[x].apply(val); }
-
-    void push(int v) {
-        apply(2 * v, lazy[v]); apply(2 * v + 1, lazy[v]);
-        lazy[v] = Tag();
-    }
-
-    void build(vector<Node> &a, int v, int l, int r) {
-        if (l == r - 1) { if(l < (int)a.size()) t[v] = a[l]; return; }
-        int m = (l + r) >> 1;
-        build(a, v*2, l, m); build(a, v*2+1, m, r);
-        t[v] = t[v*2] + t[v*2+1];
-    }
-
-    void upd(int v, int l, int r, int ql, int qr, const Tag& val) {
-        if (l >= qr || r <= ql) return;
-        if (ql <= l && r <= qr) { apply(v, val); return; }
-        push(v);
-        int m = (l + r) >> 1;
-        upd(v*2, l, m, ql, qr, val);
-        upd(v*2+1, m, r, ql, qr, val);
-        t[v] = t[2*v] + t[2*v+1];
-    }
-
-    void upd(int i, Node v, int x, int l, int r) {
-        if(r - l == 1) {t[x] = v; return;}
-        push(x);
-        int m = (l + r) / 2;
-        if(i < m) upd(i, v, 2 * x, l, m);
-        else upd(i, v, 2 * x + 1, m, r);
-        t[x] = t[2*x] + t[2*x+1];
-    }
-
-    Node qry(int v, int l, int r, int ql, int qr) {
-        if (qr <= l || r <= ql) return Node(); // Returns identity
-        if (ql <= l && r <= qr) return t[v];
-        push(v);
-        int m = (l + r) >> 1;
-        return qry(v*2, l, m, ql, qr) + qry(v*2+1, m, r, ql, qr);
-    }
-
-    void build(vector<Node>& a) { build(a, 1, 0, n); }
-    void update(int l, int r, Tag val) { upd(1, 0, n, l, r, val); }
-    void update(int i, Node v) { upd(i, v, 1, 0, n); }
-    Node query(int l, int r) { return qry(1, 0, n, l, r); }
-};
-
-int power(int a, int b) {
-    int ans = 1;
-    while(b > 0) {
-        if(b & 1) ans = ans * a;
-        a = a * a;
-        b /= 2;
-    }
-    return ans;
-}
-
 void solve() {
-    int n, m;
-    cin >> n >> m;
-    int ans = 0;
-    set<int> x, y;
-    for(int a = 1; a <= n; a++) {
-        for(int b = 1; b <= n; b++) {
-            if(a % m == 0) {
-                ans++;
-                x.insert(a);
-                int len = to_string(b).size();
-                if((power(10, len) - 1) % m == 0) y.insert(a);
+    int n, m, k;
+    cin >> n >> m >> k;
+    const int oo = 1e16;
+    vector<int> freq(n, 0), bst(n, oo);
+    vector<vector<pair<int, int>>> g(n);
+    vector<array<int, 3>> edge(m);
+    vector<array<int, 2>> train(k);
+    for(int i = 0; i < m; i++) {
+        int u, v, w;
+        cin >> u >> v >> w;
+        u--, v--;
+        edge[i] = {u, v, w};
+        g[u].push_back({v, w});
+        g[v].push_back({u, w});
+    }
+    for(int i = 0; i < k; i++) {
+        int v, w;
+        cin >> v >> w;
+        v--;
+        train[i] = {v, w};
+        g[0].push_back({v, w});
+        g[v].push_back({0, w});
+        freq[v]++;
+        bst[v] = min(bst[v], w);
+    }
+    auto dijkstra = [&n, &oo] (vector<vector<pair<int, int>>>& g) -> vector<int> {
+        vector<int> dist(n, oo);
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+        dist[0] = 0;
+        pq.push({0, 0});
+        while(!pq.empty()) {
+            auto [d, v] = pq.top();
+            pq.pop();
+            if(d != dist[v]) continue;
+            for(auto [c, w]: g[v]) {
+                if(d + w < dist[c]) {
+                    dist[c] = d + w;
+                    pq.push({d + w, c});
+                }
             }
-            else {
-                int len = to_string(b).size();
-                if((power(10, len) - 1) % m == 0) ans++, y.insert(b);
-            } 
         }
+        return dist;
+    };
+    auto d1 = dijkstra(g);
+    int ans = 0;
+    for(int i = 0; i < k; i++) {
+        for(int x = 0; x < n; x++) g[x].clear();
+        for(int j = 0; j < k; j++) {
+            if(i == j) continue;
+            auto [v, w] = train[j];
+            g[0].push_back({v, w});
+            g[v].push_back({0, w});
+        }
+        for(auto [u, v, w]: edge) {
+            g[u].push_back({v, w});
+            g[v].push_back({u, w});
+        }
+        auto d = dijkstra(g);
+        bool diff = false;
+        for(int j = 0; j < n; j++) {
+            if(d[j] != d1[j]) {
+                diff = true;
+                break;
+            }
+        }
+        if(not diff) ans++;
     }
     cout << ans << '\n';
 }
@@ -133,7 +86,7 @@ signed main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
     int t = 1;
-    cin >> t;
+    // cin >> t;
     while(t--) {
         solve();
     }

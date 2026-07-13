@@ -12,8 +12,6 @@ const int MOD1 = 1e9+7;
 const int MOD2 = 998244353;
 
 void solve() {
-    // we have to construct a graph out of only edges used in shortest paths
-
     int n, m, k;
     cin >> n >> m >> k;
     const int oo = 1e16;
@@ -25,7 +23,6 @@ void solve() {
         int u, v, w;
         cin >> u >> v >> w;
         u--, v--;
-        w *= 2;
         edge[i] = {u, v, w};
         g[u].push_back({v, w});
         g[v].push_back({u, w});
@@ -34,7 +31,6 @@ void solve() {
         int v, w;
         cin >> v >> w;
         v--;
-        w = w * 2 + 1;
         train[i] = {v, w};
         g[0].push_back({v, w});
         g[v].push_back({0, w});
@@ -42,24 +38,40 @@ void solve() {
         bst[v] = min(bst[v], w);
     }
     vector<int> dist(n, oo);
-    #define pii pair<int, int>
-    vector<pii> par(n, {-1, 0});
-    priority_queue<pii, vector<pii>, greater<pii>> pq;
-    pq.push({0, 0});
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
     dist[0] = 0;
-    while(pq.size()) {
+    pq.push({0, 0});
+    while(!pq.empty()) {
         auto [d, v] = pq.top();
         pq.pop();
-        if(d > dist[v]) continue;
+        if(d != dist[v]) continue;
         for(auto [c, w]: g[v]) {
             if(d + w < dist[c]) {
                 dist[c] = d + w;
-                par[c] = {v, w};
-                pq.push({dist[c], c});
+                pq.push({d + w, c});
             }
         }
     }
-    
+    vector<int> in(n, 0);
+    for(int i = 0; i < n; i++) {
+        for(auto [c, w]: g[i]) {
+            if(dist[i] + w == dist[c]) {
+                in[c]++;
+            }
+        }
+    }
+    int ans = 0;
+    for(auto [v, w]: train) {
+        if(dist[v] != w) {
+            ans++;
+            continue;
+        } 
+        if(in[v] > 1) {
+            in[v]--;
+            ans++;
+        }
+    }
+    cout << ans << '\n';
 }
 
 signed main() {
