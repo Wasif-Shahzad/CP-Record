@@ -17,7 +17,7 @@ int generateRandomInt(int l, int r) {
     // which causes identical values in tight loops.
     static unsigned seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
     static std::mt19937 eng(seed);
-    
+
     std::uniform_int_distribution<int> distrib(l, r);
     return distrib(eng);
 }
@@ -25,15 +25,13 @@ int generateRandomInt(int l, int r) {
 signed main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
-    // cout << 1 << '\n';
+    cout << 1 << '\n';
     // Macro from your snippet
     #define get(l, r) generateRandomInt(l, r)
-    int n = get(2, 7), m = get(1, 6), k = get(1, n);
-    cout << n << " " << m << " " << k << '\n';
-    for(int i = 0; i < m; i++) {
-        cout << get(1, n) << " " << get(1, n) << " " << get(1, 5) << '\n';
+    int n = get(2, 5), k = get(3, 3);
+    cout << n << ' ' << k << '\n';
+    for(int i = 0; i < n; i++) {
+        cout << get(0, 1) << " ";
     }
-    for(int i = 0; i < k; i++) {
-        cout << get(2, n) << " " << get(1, 5) << '\n';
-    }
+    cout << '\n';
 }

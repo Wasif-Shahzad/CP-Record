@@ -1,73 +1,38 @@
-//
-// 449B.cpp
-// Created by wasifshahzad on 06/23/26 at 18:50:17.
-//
-
 #include <bits/stdc++.h>
 using namespace std;
 #define int long long
-#define all(x) x.begin(), x.end()
-
-const int MOD1 = 1e9+7;
-const int MOD2 = 998244353;
 
 void solve() {
-    // we have to construct a graph out of only edges used in shortest paths
-
-    int n, m, k;
-    cin >> n >> m >> k;
-    const int oo = 1e16;
-    vector<int> freq(n, 0), bst(n, oo);
-    vector<vector<pair<int, int>>> g(n);
-    vector<array<int, 3>> edge(m);
-    vector<array<int, 2>> train(k);
-    for(int i = 0; i < m; i++) {
-        int u, v, w;
-        cin >> u >> v >> w;
-        u--, v--;
-        w *= 2;
-        edge[i] = {u, v, w};
-        g[u].push_back({v, w});
-        g[v].push_back({u, w});
-    }
+    /*
+     * we add min(i, k - 1) stones to the total
+     * at the end alice will want even stones in the first pile
+     */
+    int n, k;
+    cin >> n >> k;
+    vector<int> a(n);
+    for(int &i: a) cin >> i;
+    vector<int> dist(n);
+    int sum = 0, our = 0;
     for(int i = 0; i < k; i++) {
-        int v, w;
-        cin >> v >> w;
-        v--;
-        w = w * 2 + 1;
-        train[i] = {v, w};
-        g[0].push_back({v, w});
-        g[v].push_back({0, w});
-        freq[v]++;
-        bst[v] = min(bst[v], w);
+        dist[i] = i + 1;
+        our += dist[i];
+        sum += dist[i] * a[i];
     }
-    vector<int> dist(n, oo);
-    #define pii pair<int, int>
-    vector<pii> par(n, {-1, 0});
-    priority_queue<pii, vector<pii>, greater<pii>> pq;
-    pq.push({0, 0});
-    dist[0] = 0;
-    while(pq.size()) {
-        auto [d, v] = pq.top();
-        pq.pop();
-        if(d > dist[v]) continue;
-        for(auto [c, w]: g[v]) {
-            if(d + w < dist[c]) {
-                dist[c] = d + w;
-                par[c] = {v, w};
-                pq.push({dist[c], c});
-            }
-        }
+    for(int i = k; i < n; i++) {
+        dist[i] = our + 1;
+        our -= dist[i - k];
+        our += dist[i];
+        sum += dist[i] * a[i];
     }
-    
+    cout << ((sum & 1) ? "Alice" : "Bob") << '\n';
 }
 
 signed main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
-    int t = 1;
-    // cin >> t;
-    while(t--) {
+    int t;
+    cin >> t;
+    while (t--) {
         solve();
     }
 }
